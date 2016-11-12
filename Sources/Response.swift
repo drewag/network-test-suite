@@ -14,6 +14,7 @@ public struct Response {
         case index(Int)
     }
 
+    let coordinator = ParsedResponseCoordinator.singleton
     let rawResponse: HTTPURLResponse
     let data: Data?
     let jsonPath: [JSONPath]
@@ -93,6 +94,24 @@ public struct Response {
             throw TestError(description: "Expected \(actual) to be \(bool)")
         }
     }
+
+    public func expectExists() throws {
+        let _ = try self.objectForJSONPath()
+    }
+
+    public func parse<Value: ParsableResponse>(for key: ParsedResponseKey<Value>.Type) throws {
+        try self.coordinator.parse(responseObject: try self.objectForJSONPath(), for: key)
+    }
+
+    public func expect(arrayCount count: Int) throws {
+        guard let actual = try self.objectForJSONPath() as? [Any] else {
+            throw TestError(description: "Expected array at \(self.path)")
+        }
+
+        guard actual.count == count else {
+            throw TestError(description: "Expected array count \(actual.count) to be \(count)")
+        }
+    }
 }
 
 private extension Response {
@@ -101,7 +120,14 @@ private extension Response {
             throw TestError(description: "No data returned with response")
         }
 
-        var object = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
+        var object: Any!
+        do {
+            object = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
+        }
+        catch {
+            throw TestError(description: "Invalid JSON response")
+        }
+
         var path = ""
         for element in self.jsonPath {
             if !path.isEmpty {
@@ -124,7 +150,7 @@ private extension Response {
                     throw TestError(description: "Expected dictionary at \(path)")
                 }
                 guard let dictObject = dict[key] else {
-                    throw TestError(description: "Object does not exist at \(path)")
+                    throw TestError(description: "Expected object at \(path) but it does not exist")
                 }
                 object = dictObject
             }

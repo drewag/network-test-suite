@@ -8,20 +8,24 @@
 
 import Foundation
 
-public protocol Test: AnyObject {
+public protocol Test: AnyObject, CustomStringConvertible {
     var name: String {get}
     var parent: Test? {get set}
+    var headers: [String:Any] {get}
 
-    func perform(onURL URL: URL, reportingResultsTo resultCollection: ResultCollection, onComplete: @escaping () -> ())
+    func perform(onURL URL: URL, inQueue queue: OperationQueue, reportingResultsTo resultCollection: ResultCollection, onComplete: @escaping () -> ())
 }
 
 extension Test {
     public func execute(onURL URL: URL) {
         let resultCollection = ResultCollection()
+        let queue = OperationQueue()
         let semaphore = DispatchSemaphore(value: 0)
-        self.perform(onURL: URL, reportingResultsTo: resultCollection, onComplete: {
-            semaphore.signal()
-        })
+        queue.addOperation {
+            self.perform(onURL: URL, inQueue: queue, reportingResultsTo: resultCollection, onComplete: {
+                semaphore.signal()
+            })
+        }
         semaphore.wait()
         print(resultCollection)
     }
