@@ -13,7 +13,7 @@ public class ResultCollection: CustomStringConvertible {
 
     func fail(spec: TestSpec, withError error: Error, request: URLRequest?, response: HTTPURLResponse?, data: Data?) {
         let newResult = self.rootResult.addResult(status: .failed(error, request, response, data), atPath: spec.namePath, atLevel: 0)
-        print(newResult.realTimeDescription(at: spec.namePath))
+        print("\u{001B}[0;31m\(newResult.realTimeDescription(at: spec.namePath))\u{001B}[m")
     }
 
     func pass(spec: TestSpec) {

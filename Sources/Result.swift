@@ -134,14 +134,14 @@ class SpecResult: Result {
 
         switch self.status {
         case .failed(let error, _, _, _):
-            output += "FAIL: "
+            output += "\u{001B}[0;31mFAIL: "
             switch error {
             case let testError as TestError:
                 output += testError.description
             default:
                 output += error.localizedDescription
             }
-            output += "\n"
+            output += "\u{001B}[m\n"
         case .passed:
             output += "PASS\n"
         }
