@@ -6,3 +6,5 @@ Needed Short-term Changes
 Long Term Ideas
 ======================
 - Use parsed responses in expectations
+- Allow focusing specific tests
+- Easily rerun only the next failed test. This could be used to fix each error, one at a time.
