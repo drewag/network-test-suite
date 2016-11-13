@@ -10,6 +10,7 @@ import Foundation
 
 open class TestSuite: Test {
     public let name: String
+    public let queryParameters: [String:Any]
     public let headers: [String:Any]
     let endpoint: String
     let tests: [Test]
@@ -26,11 +27,12 @@ open class TestSuite: Test {
         return output
     }
 
-    public init(name: String, endpoint: String, synchronous: Bool = true, headers: [String:Any] = [:], tests: [Test]) {
+    public init(name: String, endpoint: String, synchronous: Bool = true, queryParameters: [String:Any] = [:], headers: [String:Any] = [:], tests: [Test]) {
         self.name = name
         self.endpoint = endpoint
         self.tests = tests
         self.synchronous = synchronous
+        self.queryParameters = queryParameters
         self.headers = headers
 
         for test in self.tests {

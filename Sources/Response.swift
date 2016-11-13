@@ -120,6 +120,13 @@ private extension Response {
             throw TestError(description: "No data returned with response")
         }
 
+        guard !self.jsonPath.isEmpty else {
+            guard let string = String(data: data, encoding: .utf8) else {
+                throw TestError(description: "Invalid string response")
+            }
+            return string
+        }
+
         var object: Any!
         do {
             object = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
