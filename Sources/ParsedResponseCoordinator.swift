@@ -14,15 +14,17 @@ public enum ParsedResponseValueStatus {
     case parsed(Any)
 }
 
-public class ParsedResponseValue {
+public class ParsedResponseValue: HeaderValue {
     let translate: ((Any) -> String)?
 
     var status = Observable(ParsedResponseValueStatus.waiting)
 
-    var value: String? {
+    public func string() throws -> String {
         switch self.status.value {
-        case .failed, .waiting:
-            return nil
+        case .failed:
+            throw LocalUserReportableError(source: "ParsedResponseCoordinator", operation: "retrieving value", message: "Parsing of value failed", reason: .internal)
+        case .waiting:
+            throw LocalUserReportableError(source: "ParsedResponseCoordinator", operation: "retrieving value", message: "Parsing of value has not occured yet", reason: .internal)
         case .parsed(let object):
             if let translate = self.translate {
                 return translate(object)

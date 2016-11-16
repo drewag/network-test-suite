@@ -25,8 +25,8 @@ public class TestSpec: Test {
     }
 
     public let name: String
-    public let queryParameters: [String:Any]
-    public let headers: [String:Any]
+    public let queryParameters: [String:QueryValue]
+    public let headers: [String:HeaderValue]
     let endpoint: Endpoint
     let method: Method
     let data: Data?
@@ -43,8 +43,8 @@ public class TestSpec: Test {
         endpoint: String,
         method: Method,
         data: Data? = nil,
-        queryParameters: [String:Any] = [:],
-        headers: [String:Any] = [:],
+        queryParameters: [String:QueryValue] = [:],
+        headers: [String:HeaderValue] = [:],
         test: @escaping (Response) throws -> ()
         )
     {
@@ -62,8 +62,8 @@ public class TestSpec: Test {
         endpoint: ParsedResponseValue,
         method: Method,
         data: Data? = nil,
-        queryParameters: [String:Any] = [:],
-        headers: [String:Any] = [:],
+        queryParameters: [String:QueryValue] = [:],
+        headers: [String:HeaderValue] = [:],
         test: @escaping (Response) throws -> ()
         )
     {
@@ -80,8 +80,8 @@ public class TestSpec: Test {
         name: String,
         endpoint: String,
         method: Method,
-        queryParameters: [String:Any] = [:],
-        headers: [String:Any] = [:],
+        queryParameters: [String:QueryValue] = [:],
+        headers: [String:HeaderValue] = [:],
         json: [String:Any],
         test: @escaping (Response) throws -> ()
         )
@@ -99,8 +99,8 @@ public class TestSpec: Test {
         name: String,
         endpoint: ParsedResponseValue,
         method: Method,
-        queryParameters: [String:Any] = [:],
-        headers: [String:Any] = [:],
+        queryParameters: [String:QueryValue] = [:],
+        headers: [String:HeaderValue] = [:],
         json: [String:Any],
         test: @escaping (Response) throws -> ()
         )
@@ -137,10 +137,11 @@ public class TestSpec: Test {
                 case .waiting:
                     return
                 case .parsed, .failed:
-                    if let string = parsedValue.value {
+                    do {
+                        let string = try parsedValue.string()
                         onComplete(.success(string))
                     }
-                    else {
+                    catch {
                         onComplete(.failed)
                     }
                 }
@@ -150,25 +151,36 @@ public class TestSpec: Test {
 
     func getAllHeaders(onComplete: @escaping (GetDictResult) -> ()) {
         var pendingValuesCount = 0
-        var allHeaders = [String:Any]()
+        var allHeaders = [String:HeaderValue]()
 
         var retrievedCount = 0
         func checkDone() {
-            retrievedCount += 1
             if retrievedCount == pendingValuesCount {
                 for (key, value) in allHeaders {
                     if let parsedValue = value as? ParsedResponseValue {
-                        if let string = parsedValue.value {
+                        do {
+                            let string = try parsedValue.string()
                             allHeaders[key] = string
                         }
-                        else {
+                        catch {
                             onComplete(.failed(failedKey: key))
                             return
                         }
                     }
                 }
 
-                onComplete(.success(allHeaders as! [String:String]))
+                var finalHeades = [String:String]()
+                for (key, value) in allHeaders {
+                    do {
+                        finalHeades[key] = try value.string()
+                    }
+                    catch {
+                        onComplete(.failed(failedKey: key))
+                        return
+                    }
+
+                }
+                onComplete(.success(finalHeades))
             }
         }
 
@@ -184,6 +196,7 @@ public class TestSpec: Test {
                             case .waiting:
                                 return
                             case .parsed, .failed:
+                                retrievedCount += 1
                                 checkDone()
                             }
                         }
@@ -195,31 +208,42 @@ public class TestSpec: Test {
         }
 
         if pendingValuesCount == 0 {
-            onComplete(.success(allHeaders as! [String:String]))
+            checkDone()
         }
     }
 
     func getAllQueryParameters(onComplete: @escaping (GetDictResult) -> ()) {
         var pendingValuesCount = 0
-        var allQueryParameters = [String:Any]()
+        var allQueryParameters = [String:QueryValue]()
 
         var retrievedCount = 0
         func checkDone() {
-            retrievedCount += 1
             if retrievedCount == pendingValuesCount {
                 for (key, value) in allQueryParameters {
                     if let parsedValue = value as? ParsedResponseValue {
-                        if let string = parsedValue.value {
+                        do {
+                            let string = try parsedValue.string()
                             allQueryParameters[key] = string
                         }
-                        else {
+                        catch {
                             onComplete(.failed(failedKey: key))
                             return
                         }
                     }
                 }
 
-                onComplete(.success(allQueryParameters as! [String:String]))
+                var finalHeades = [String:String]()
+                for (key, value) in allQueryParameters {
+                    do {
+                        finalHeades[key] = try value.string()
+                    }
+                    catch {
+                        onComplete(.failed(failedKey: key))
+                        return
+                    }
+
+                }
+                onComplete(.success(finalHeades))
             }
         }
 
@@ -235,6 +259,7 @@ public class TestSpec: Test {
                             case .waiting:
                                 return
                             case .parsed, .failed:
+                                retrievedCount += 1
                                 checkDone()
                             }
                         }
@@ -246,7 +271,7 @@ public class TestSpec: Test {
         }
 
         if pendingValuesCount == 0 {
-            onComplete(.success(allQueryParameters as! [String:String]))
+            checkDone()
         }
     }
 }

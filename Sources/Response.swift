@@ -104,12 +104,16 @@ public struct Response {
     }
 
     public func expect(arrayCount count: Int) throws {
-        guard let actual = try self.objectForJSONPath() as? [Any] else {
+        switch try self.objectForJSONPath() {
+        case let actual as [Any]:
+            guard actual.count == count else {
+                throw TestError(description: "Expected array count \(actual.count) to be \(count)")
+            }
+        case let actual as String where actual == "[]":
+            break
+        default:
             throw TestError(description: "Expected array at \(self.path)")
-        }
 
-        guard actual.count == count else {
-            throw TestError(description: "Expected array count \(actual.count) to be \(count)")
         }
     }
 }
@@ -129,7 +133,7 @@ private extension Response {
 
         var object: Any!
         do {
-            object = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
+            object = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions())
         }
         catch {
             throw TestError(description: "Invalid JSON response")

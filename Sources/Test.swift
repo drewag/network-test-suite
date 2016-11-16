@@ -11,8 +11,8 @@ import Foundation
 public protocol Test: AnyObject, CustomStringConvertible {
     var name: String {get}
     var parent: Test? {get set}
-    var queryParameters: [String:Any] {get}
-    var headers: [String:Any] {get}
+    var queryParameters: [String:QueryValue] {get}
+    var headers: [String:HeaderValue] {get}
 
     func perform(onURL URL: URL, inQueue queue: OperationQueue, reportingResultsTo resultCollection: ResultCollection, onComplete: @escaping () -> ())
 }

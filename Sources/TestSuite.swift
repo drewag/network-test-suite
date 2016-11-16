@@ -10,8 +10,8 @@ import Foundation
 
 open class TestSuite: Test {
     public let name: String
-    public let queryParameters: [String:Any]
-    public let headers: [String:Any]
+    public let queryParameters: [String:QueryValue]
+    public let headers: [String:HeaderValue]
     let endpoint: String
     let tests: [Test]
     let synchronous: Bool
@@ -27,7 +27,15 @@ open class TestSuite: Test {
         return output
     }
 
-    public init(name: String, endpoint: String, synchronous: Bool = true, queryParameters: [String:Any] = [:], headers: [String:Any] = [:], tests: [Test]) {
+    public init(
+        name: String,
+        endpoint: String,
+        synchronous: Bool = true,
+        queryParameters: [String:QueryValue] = [:],
+        headers: [String:HeaderValue] = [:],
+        tests: [Test]
+        )
+    {
         self.name = name
         self.endpoint = endpoint
         self.tests = tests
@@ -40,7 +48,13 @@ open class TestSuite: Test {
         }
     }
 
-    public func perform(onURL URL: URL, inQueue queue: OperationQueue, reportingResultsTo resultCollection: ResultCollection, onComplete: @escaping () -> ()) {
+    public func perform(
+        onURL URL: URL,
+        inQueue queue: OperationQueue,
+        reportingResultsTo resultCollection: ResultCollection,
+        onComplete: @escaping () -> ()
+        )
+    {
         let URL = URL.appendingPathComponent(self.endpoint)
         if self.synchronous {
             self.perform(tests: self.tests, synchronouslyOnURL: URL, inQueue: queue, reportingResultsTo: resultCollection, onComplete: onComplete)
@@ -52,7 +66,14 @@ open class TestSuite: Test {
 }
 
 private extension TestSuite {
-    func perform(tests: [Test], synchronouslyOnURL URL: URL, inQueue queue: OperationQueue, reportingResultsTo resultCollection: ResultCollection, onComplete: @escaping () -> ()) {
+    func perform(
+        tests: [Test],
+        synchronouslyOnURL URL: URL,
+        inQueue queue: OperationQueue,
+        reportingResultsTo resultCollection: ResultCollection,
+        onComplete: @escaping () -> ()
+        )
+    {
         guard tests.count > 0 else {
             onComplete()
             return
@@ -65,7 +86,13 @@ private extension TestSuite {
         }
     }
 
-    func performAsynchronous(onURL URL: URL, inQueue queue: OperationQueue, reportingResultsTo resultCollection: ResultCollection, onComplete: @escaping () -> ()) {
+    func performAsynchronous(
+        onURL URL: URL,
+        inQueue queue: OperationQueue,
+        reportingResultsTo resultCollection: ResultCollection,
+        onComplete: @escaping () -> ()
+        )
+    {
         let originalTestCount = self.tests.count
         var completedCount = 0
         func completion() {
