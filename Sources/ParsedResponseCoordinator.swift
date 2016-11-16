@@ -36,6 +36,10 @@ public class ParsedResponseValue {
     }
 }
 
+public func ParsedResponse<Value: ParsableResponse>(for key: ParsedResponseKey<Value>.Type, translate: ((Any) -> String)? = nil) -> ParsedResponseValue {
+    return ParsedResponseCoordinator.singleton.value(for: key, translate: translate)
+}
+
 public class ParsedResponseCoordinator {
     static public let singleton = ParsedResponseCoordinator()
 
@@ -53,7 +57,7 @@ public class ParsedResponseCoordinator {
         parsedResponse.status.value = .parsed(value)
     }
 
-    public func value<Value: ParsableResponse>(for key: ParsedResponseKey<Value>.Type, translate: ((Any) -> String)? = nil) -> ParsedResponseValue {
+    func value<Value: ParsableResponse>(for key: ParsedResponseKey<Value>.Type, translate: ((Any) -> String)? = nil) -> ParsedResponseValue {
         return self.parsedResponse(for: key, translate: translate)
     }
 }
