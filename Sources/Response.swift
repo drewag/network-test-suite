@@ -14,6 +14,11 @@ public struct Response {
         case index(Int)
     }
 
+    public enum TestResult {
+        case passed
+        case failed(String)
+    }
+
     let coordinator = ParsedResponseCoordinator.singleton
     let rawResponse: HTTPURLResponse
     let data: Data?
@@ -66,6 +71,19 @@ public struct Response {
         }
     }
 
+    public func expectString(passing test: (String) throws -> (TestResult)) throws {
+        guard let actual = try self.objectForJSONPath() as? String else {
+            throw TestError(description: "Expected string at \(self.path)")
+        }
+
+        switch try test(actual) {
+        case .passed:
+            break
+        case .failed(let reason):
+            throw TestError(description: "\(actual) failed test because \(reason)")
+        }
+    }
+
     public func expect(_ int: Int) throws {
         guard let actual = try self.objectForJSONPath() as? Int else {
             throw TestError(description: "Expected int at \(self.path)")
@@ -73,7 +91,21 @@ public struct Response {
 
         guard int == actual else {
             throw TestError(description: "Expected '\(actual)' to be \(int)")
-        }    }
+        }
+    }
+
+    public func expectInt(passing test: (Int) throws -> (TestResult)) throws {
+        guard let actual = try self.objectForJSONPath() as? Int else {
+            throw TestError(description: "Expected string at \(self.path)")
+        }
+
+        switch try test(actual) {
+        case .passed:
+            break
+        case .failed(let reason):
+            throw TestError(description: "\(actual) failed test because \(reason)")
+        }
+    }
 
     public func expect(_ double: Double) throws {
         guard let actual = try self.objectForJSONPath() as? Double else {
@@ -82,6 +114,19 @@ public struct Response {
 
         guard double == actual else {
             throw TestError(description: "Expected \(actual) to be \(double)")
+        }
+    }
+
+    public func expectDouble(passing test: (Double) throws -> (TestResult)) throws {
+        guard let actual = try self.objectForJSONPath() as? Double else {
+            throw TestError(description: "Expected string at \(self.path)")
+        }
+
+        switch try test(actual) {
+        case .passed:
+            break
+        case .failed(let reason):
+            throw TestError(description: "\(actual) failed test because \(reason)")
         }
     }
 
