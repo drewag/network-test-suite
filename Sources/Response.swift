@@ -99,6 +99,12 @@ public struct Response {
         let _ = try self.objectForJSONPath()
     }
 
+    public func expectNil() throws {
+        if let object = try self.optionalObjectForJSONPath() {
+            throw TestError(description: "Expected \(object) to be nil")
+        }
+    }
+
     public func parse<Value: ParsableResponse>(for key: ParsedResponseKey<Value>.Type) throws {
         try self.coordinator.parse(responseObject: try self.objectForJSONPath(), for: key)
     }
@@ -120,6 +126,14 @@ public struct Response {
 
 private extension Response {
     func objectForJSONPath() throws -> Any {
+        guard let object = try self.optionalObjectForJSONPath() else {
+            throw TestError(description: "Expected object at \(self.path) but it does not exist")
+        }
+        return object
+    }
+
+
+    func optionalObjectForJSONPath() throws -> Any? {
         guard let data = self.data else {
             throw TestError(description: "No data returned with response")
         }
@@ -140,7 +154,7 @@ private extension Response {
         }
 
         var path = ""
-        for element in self.jsonPath {
+        for (index, element) in self.jsonPath.enumerated() {
             if !path.isEmpty {
                 path += "."
             }
@@ -161,6 +175,9 @@ private extension Response {
                     throw TestError(description: "Expected dictionary at \(path)")
                 }
                 guard let dictObject = dict[key] else {
+                    if index == self.jsonPath.count - 1 {
+                        return nil
+                    }
                     throw TestError(description: "Expected object at \(path) but it does not exist")
                 }
                 object = dictObject
