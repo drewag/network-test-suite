@@ -146,7 +146,9 @@ public struct Response {
 
     public func expectNil() throws {
         if let object = try self.optionalObjectForJSONPath() {
-            throw TestError(description: "Expected \(object) to be nil")
+            if !(object is NSNull) {
+                throw TestError(description: "Expected \(object) to be nil")
+            }
         }
     }
 
