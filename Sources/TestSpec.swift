@@ -317,7 +317,7 @@ private extension TestSpec {
         request.httpBody = self.data
         request.httpMethod = self.method.rawValue
         request.allHTTPHeaderFields = headers
-        let task = URLSession.shared.dataTask(with: request) { data, rawResponse, error in
+        let task = NetworkService.singleton.session.dataTask(with: request) { data, rawResponse, error in
             queue.addOperation {
                 if let error = error {
                     resultCollection.fail(spec: self, withError: error, request: request, response: rawResponse as? HTTPURLResponse, data: data)
