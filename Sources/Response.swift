@@ -117,6 +117,20 @@ public struct Response {
         }
     }
 
+    public func expectDate(within: TimeInterval) throws {
+        guard let actual = try self.objectForJSONPath() as? String else {
+            throw TestError(description: "Expected date at \(self.path) (wasn't string)")
+        }
+
+        guard let date = actual.iso8601DateTime else {
+            throw TestError(description: "Expected date at \(self.path) (was invalid)")
+        }
+
+        guard date.timeIntervalSinceNow < within else {
+            throw TestError(description: "Expected date at \(self.path) (not within time limit)")
+        }
+    }
+
     public func expectDouble(passing test: (Double) throws -> (TestResult)) throws {
         guard let actual = try self.objectForJSONPath() as? Double else {
             throw TestError(description: "Expected string at \(self.path)")
