@@ -15,6 +15,7 @@ public protocol Test: AnyObject, CustomStringConvertible {
     var headers: [String:HeaderValue] {get}
 
     func perform(onURL URL: URL, inQueue queue: OperationQueue, reportingResultsTo resultCollection: ResultCollection, onComplete: @escaping () -> ())
+    func report(_ error: Error, request: URLRequest?, response: HTTPURLResponse?, data: Data?, to resultCollection: ResultCollection)
 }
 
 extension Test {

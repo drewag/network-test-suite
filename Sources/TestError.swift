@@ -8,5 +8,4 @@
 
 struct TestError: Error {
     let description: String
-
 }

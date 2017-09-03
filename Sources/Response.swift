@@ -183,6 +183,26 @@ public struct Response {
 
         }
     }
+
+    public func expect(arrayContains: (Response) throws -> ()) throws {
+        switch try self.objectForJSONPath() {
+        case let actual as [Any]:
+            for index in 0 ..< actual.count {
+                do {
+                    try arrayContains(Response(rawResponse: self.rawResponse, data: data, jsonPath: self.jsonPath + [.index(index)]))
+                    return
+                }
+                catch {
+                    continue
+                }
+            }
+            throw TestError(description: "Did not find value in array that passed all the tests")
+        case let actual as String where actual == "[]":
+            break
+        default:
+            throw TestError(description: "Expected array at \(self.path)")
+        }
+    }
 }
 
 private extension Response {
@@ -197,13 +217,6 @@ private extension Response {
     func optionalObjectForJSONPath() throws -> Any? {
         guard let data = self.data else {
             throw TestError(description: "No data returned with response")
-        }
-
-        guard !self.jsonPath.isEmpty else {
-            guard let string = String(data: data, encoding: .utf8) else {
-                throw TestError(description: "Invalid string response")
-            }
-            return string
         }
 
         var object: Any!

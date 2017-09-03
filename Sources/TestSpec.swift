@@ -274,6 +274,10 @@ public class TestSpec: Test {
             checkDone()
         }
     }
+
+    public func report(_ error: Error, request: URLRequest?, response: HTTPURLResponse?, data: Data?, to resultCollection: ResultCollection) {
+        resultCollection.fail(spec: self, withError: error, request: request, response: response, data: data)
+    }
 }
 
 private extension TestSpec {
@@ -282,7 +286,7 @@ private extension TestSpec {
             switch result {
             case .failed(failedKey: let key):
                 let error = TestError(description: "Dependent parsed response value \(key) failed")
-                resultCollection.fail(spec: self, withError: error, request: nil, response: nil, data: nil)
+                self.report(error, request: nil, response: nil, data: nil, to: resultCollection)
                 onComplete()
             case .success(let headers):
                 self.perform(onURL: URL, endpoint: endpoint, headers: headers, inQueue: queue, reportingResultsTo: resultCollection, onComplete: onComplete)
@@ -295,7 +299,7 @@ private extension TestSpec {
             switch result {
             case .failed(failedKey: let key):
                 let error = TestError(description: "Dependent parsed response value \(key) failed")
-                resultCollection.fail(spec: self, withError: error, request: nil, response: nil, data: nil)
+                self.report(error, request: nil, response: nil, data: nil, to: resultCollection)
                 onComplete()
             case .success(let queryParameters):
                 self.perform(onURL: URL, endpoint: endpoint, headers: headers, queryParameters: queryParameters, inQueue: queue, reportingResultsTo: resultCollection, onComplete: onComplete)
@@ -320,7 +324,7 @@ private extension TestSpec {
         let task = NetworkService.singleton.session.dataTask(with: request) { data, rawResponse, error in
             queue.addOperation {
                 if let error = error {
-                    resultCollection.fail(spec: self, withError: error, request: request, response: rawResponse as? HTTPURLResponse, data: data)
+                    self.report(error, request: request, response: rawResponse as? HTTPURLResponse, data: data, to: resultCollection)
                     onComplete()
                     return
                 }
