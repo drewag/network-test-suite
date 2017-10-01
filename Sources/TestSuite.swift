@@ -163,7 +163,7 @@ private extension TestSuite {
         case .string(let string):
             onComplete(.success(string))
         case .parsed(let parsedValue):
-            parsedValue.status.addNewObserver(self, options: .OnlyOnce | .Initial) { status in
+            parsedValue.status.addNewValueObserver(self, options: [.onlyOnce, .initial]) { status in
                 switch status {
                 case .waiting:
                     return

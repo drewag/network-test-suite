@@ -132,7 +132,7 @@ public class TestSpec: Test {
         case .string(let string):
             onComplete(.success(string))
         case .parsed(let parsedValue):
-            parsedValue.status.addNewObserver(self, options: .OnlyOnce | .Initial) { status in
+            parsedValue.status.addNewValueObserver(self, options: [.onlyOnce, .initial]) { status in
                 switch status {
                 case .waiting:
                     return
@@ -191,7 +191,7 @@ public class TestSpec: Test {
                     allHeaders[key] = value
                     if let parsedValue = value as? ParsedResponseValue {
                         pendingValuesCount += 1
-                        parsedValue.status.addNewObserver(self, options: .OnlyOnce | .Initial) { status in
+                        parsedValue.status.addNewValueObserver(self, options: [.onlyOnce, .initial]) { status in
                             switch status {
                             case .waiting:
                                 return
@@ -254,7 +254,7 @@ public class TestSpec: Test {
                     allQueryParameters[key] = value
                     if let parsedValue = value as? ParsedResponseValue {
                         pendingValuesCount += 1
-                        parsedValue.status.addNewObserver(self, options: .OnlyOnce | .Initial) { status in
+                        parsedValue.status.addNewValueObserver(self, options:  [.onlyOnce, .initial]) { status in
                             switch status {
                             case .waiting:
                                 return
