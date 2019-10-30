@@ -6,6 +6,9 @@ import PackageDescription
 let package = Package(
     name: "NetworkTestSuite",
     platforms: [.macOS(.v10_11)],
+    products: [
+        .library(name: "NetworkTestSuite", targets: ["NetworkTestSuite"]),
+    ],
     dependencies: [
         .package(url: "https://github.com/drewag/Swiftlier.git", from: "6.0.0"),
     ],
