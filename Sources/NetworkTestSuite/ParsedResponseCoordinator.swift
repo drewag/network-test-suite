@@ -14,7 +14,7 @@ public enum ParsedResponseValueStatus {
     case parsed(Any)
 }
 
-public class ParsedResponseValue: HeaderValue, ErrorGenerating {
+public class ParsedResponseValue: HeaderValue {
     let translate: ((Any) -> String)?
 
     var status = Observable(ParsedResponseValueStatus.waiting)
@@ -22,9 +22,9 @@ public class ParsedResponseValue: HeaderValue, ErrorGenerating {
     public func string() throws -> String {
         switch self.status.current {
         case .failed:
-            throw self.error("retrieving value", because: "Parsing of value failed")
+            throw GenericSwiftlierError("retrieving value", because: "Parsing of value failed")
         case .waiting:
-            throw self.error("retrieving value", because: "Parsing of value has not occured yet")
+            throw GenericSwiftlierError("retrieving value", because: "Parsing of value has not occured yet")
         case .parsed(let object):
             if let translate = self.translate {
                 return translate(object)
